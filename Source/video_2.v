@@ -124,10 +124,11 @@ begin
     hcount_raw <= hcount_raw + 1;
     hcount_read <= hcount_read + 1;
     
-    if(hcount == 496)
+    if(hcount == 495)
         begin
             hcount_raw <= 0;
-            hcount_read <= 8'h29;
+            hcount_read <= 8'h28  ;  //495,28 is correct
+            
             
         end
         
@@ -372,7 +373,7 @@ begin
 
     nopx = 1;
     
-		if (hcount == 9'h1a8 ) begin
+		if (hcount == 9'h1a8 ) begin //424
            			offset = 0;
 					count3x = 0;
 		end else 
@@ -408,7 +409,7 @@ begin
 		2: begin
 			palno = obj1in[5:0];
 			xpos = { obj3in[0], obj2in[7:0] };
-			objdisable = obj3in[1];
+			//objdisable = obj3in[1];
 			y_v_add = ypos + delay_vcount[7:0] + ( xsize[1] ? 16 : 0) - 1; 
             s_match = (offset == 129 ) ? 0 :   (xsize[1]) ? ( y_v_add[8:5]==4'b0111 ) : (y_v_add[8:4]==5'b01110);
             offset = (offset == 129 ) ? offset  :  offset + ( n_spr_in_progress ) ;
