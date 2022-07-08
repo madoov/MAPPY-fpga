@@ -354,7 +354,7 @@ rom2
 reg [18:0]dl_addr;
 wire cs_bg =        (dl_addr[16:12]==5'h0_a);        //0a000-0afff
 wire cs_cpu2 = 	    (dl_addr[16:13]== 4'b0_100);     //08000-09fff
-wire cs_palrom1 =   (dl_addr[16: 8]== 9'h0_b4 );     //0b400-0bfff
+wire cs_palrom1 =   (dl_addr[16: 8]== 9'h0_b4 );     //0b400-0b4ff
 wire cs_palrom3 =   (dl_addr[16:10]== 7'b0_1011_00 );//0b000-0b3ff
 wire cs_sprrom1 =   (dl_addr[16:14]== 3'b1_00);      //10000-13fff
 wire cs_sprrom2 =   (dl_addr[16:14]== 3'b1_01);      //14000-17fff
