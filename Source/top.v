@@ -30,8 +30,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-//
-/////////////////////////////////////////////////////////////////////////////
 module mappy_top(
 
 	output wire n_HSYNC,n_VSYNC,
@@ -70,8 +68,8 @@ module mappy_top(
 	input  wire n_sub_reset,
 	
 	
-	output  wire [7:0] wromadr,
-	input  wire [7:0] wromdat,
+	output  wire [7:0] waverom_addr,
+	input  wire [7:0] waverom_data,
 	
 	output  wire [7:0]tileclut_addr,
 	output  wire [10:0]spclut_addr, 
@@ -412,11 +410,11 @@ WSG_c1599 sound (
 		.RESET	(),
 		.pxclk	(pixel_clk),
 		.SA		(SA),
-		.SDATA	(SDO),
+		.SD 	(SDO),
 		.c99raw_out (c99out),
 		
-		.WROMADR ( wromadr ),
-		.WROMDAT	( wromdat )
+		.waverom_addr  ( waverom_addr ),
+		.waverom_data  ( waverom_data )
 );
 /////////////////////////////////////////////////////////////////////////////
 // memory 

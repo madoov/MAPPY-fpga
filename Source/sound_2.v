@@ -30,16 +30,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-
+/* This code was inspired from:
+    WSG-3ch Wave-base Sound Generator (3ch. Polyphonic) a.k.a. "Namco-WSG"
+    Written by Tsuyoshi HASEGAWA
+   
+   MANY THANKS!
+   
+   
+*/
 module WSG_c1599
 (
     input wire  RESET,      
 	input wire  pxclk,
-    input wire [15:0] SA,
-    input wire [7:0] SDATA,
+    input wire  [15:0] SA,
+    input wire  [7:0]  SD,
 	output wire [7:0]c99raw_out,
-	output wire [7:0]WROMADR,
-	input wire [7:0]WROMDAT
+	output wire [7:0]waverom_addr,
+	input wire  [7:0]waverom_data
 );
 
 reg [19:0] F [0:7];
@@ -49,17 +56,17 @@ reg [3:0]  V [0:7];
 //for grobda voice
 reg [3:0]  Vo;
 
-wire WR = (SA[15:6] == 10'h000);
+wire wr = (SA[15:6] == 10'h000);
 
 //wave counter
 reg [20:0] c [0:7];
 
 //wave prom addr.
 reg  [7:0] waveadr;
-assign WROMADR = waveadr;
+assign waverom_addr = waveadr;
 
 reg  [3:0]wavevol;
-wire [7:0]c99out = { wavevol,WROMDAT[3:0] };
+wire [7:0]c99out = { wavevol,waverom_data[3:0] };
 
 reg  [7:0]c99out_ch;
 reg  [6:0]phase_pxclk;
@@ -67,11 +74,10 @@ reg  [6:0]phase_pxclk;
 //cus99 out 
 assign c99raw_out = voin ? {4'b1111, Vo } : c99out_ch; 
 
-
 //accurate data
 // pxclk 6.144MHz
 // smpl_clk -> 384KHz
-// phase 8 phase
+// 8 phase
 
 reg voin;
 
@@ -88,26 +94,26 @@ always @ ( posedge pxclk or posedge RESET ) begin
    end
    else begin
     
-      if ( WR ) 
+      if ( wr ) 
       
       begin
       
      case (SA[2:0])
     //channel = SA[5:3];
-        3'b011: V[channel] <= SDATA[3:0];
-        3'b100: F[channel][7:0] <= SDATA; 
-        3'b101: F[channel][15:8] <= SDATA;
+        3'b011: V[channel] <= SD[3:0];
+        3'b100: F[channel][7:0] <= SD; 
+        3'b101: F[channel][15:8] <= SD;
         3'b110:
             begin
                 voin <= 1'b0;
-                W[channel]        <= SDATA[6:4];
-                F[channel][19:16] <= SDATA[3:0];
+                W[channel]        <= SD[6:4];
+                F[channel][19:16] <= SD[3:0];
             end
         //grobda
         3'b010:
             begin 
                 voin = 1'b1;
-                Vo <= SDATA[3:0];
+                Vo <= SD[3:0];
              end
  
         default : ;
@@ -119,14 +125,12 @@ end
 
 
 //pxclk = 6.144MHz
-//new phase
 //96KHz
 //= 6.144MHz / 64
 //6.144MHz / 16 = 384 khz
 //384 / 8 = 48 khz
 
 //phase 7bit
-
 //freq= 20bit
 //20bit+ 20bit => 21bit
 
@@ -143,7 +147,7 @@ begin
    end
    else begin
 		phase_pxclk <= phase_pxclk + 1;
-     //Freq : 20bits
+        //Freq : 20bits
 
         //clock phase 7f
      if (phase_pxclk[6:0]==7'h7f)

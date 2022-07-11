@@ -163,7 +163,7 @@ wire D1 = ~down;
 wire L1 = ~left;
 wire T1 = ~t1;
 wire S1 = ~start;
-wire C1 = ~coin;
+wire C1 = (~coin) | pt;
 wire T2 = ~t2;
 
 wire [7:0] JOY = {T2,U1,D1,L1,R1,T1,S1,C1};
@@ -185,7 +185,7 @@ assign DD4 = 0;
 
 reg romtrans_done;
 initial romtrans_done = 0;
-wire [7:0]WROMADR,WROMDAT;
+wire [7:0]wave_addr,wave_out;
 wire [13:0]AB_gfx2;
 wire [7:0]gfx2aout;
 wire [7:0]gfx2bout;
@@ -240,6 +240,28 @@ wire svsw;
 assign svsw = key_b;
 
 
+reg [31:0]ptrap;
+reg pt;
+always @(posedge clk_6144)
+begin
+    if ( S1 == 0 )
+        begin
+            ptrap <= 0;
+            pt<=0;
+        end
+        else 
+           ptrap <= ptrap + 32'h1;
+
+           
+    if (ptrap == 32'h123c_c000)
+        pt<=1;
+    if (ptrap == 32'h1245_6000)
+        pt<=0;
+        
+end
+
+
+
 mappy_top mappy (
 	.n_HSYNC	(HS)	,
 	.n_VSYNC	(VS)	,
@@ -269,8 +291,8 @@ mappy_top mappy (
 	.n_main_reset (n_main_reset),
 	.n_sub_reset (n_sub_reset),
 	
-	.wromadr ( WROMADR ),
-	.wromdat ( WROMDAT ),
+	.waverom_addr ( wave_addr ),
+	.waverom_data ( wave_out ),
 
 	.tileclut_addr	( tileclut_addr ),
 	.spclut_addr	( spclut_addr ),
@@ -539,10 +561,10 @@ gfxrom2b
 true_dual_port_ram #( 4, 8 )
 sndrom
 (
-		.addr1 ( WROMADR ),
+		.addr1 ( wave_addr ),
 		.we1 ( 0 ),
 		.din1 ( 0 ),
-		.dout1 ( WROMDAT ),
+		.dout1 ( wave_out ),
 		.clka ( ~clk_6144 ),
 		
 		.addr2 ( dl_addr[7:0] ),
