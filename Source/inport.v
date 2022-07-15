@@ -365,7 +365,7 @@ always @(posedge pxclk)
         //mp,gr,td,d2
         if (game_kind[1] == 0)
         begin
-      	port_4801[0] =   (reg48xx[9] ? 0 : port_4805[2]);
+      	port_4801[0] =   ( coin_counter == 0 ) ? 0 :  (reg48xx[9] ? 0 : port_4805[2]);
         coin_toggle[0] = ( coin_toggle[1] ? 0 : COIN );
         coin_toggle[1] = COIN;
         port_4800[0] =  coin_toggle[0];
@@ -396,12 +396,12 @@ end
         if ( game_kind==4'b1011 ) 
              port_4801 = { 5'b11110 ,  coin_counter };
         else 
-        
-            if ( ~(game_kind == 4'b0011 || game_kind == 4'b1110) ) 
-                    port_4803 = { 5'b11110 ,  coin_counter };
+             if ( ~ (game_kind == 4'b0011 || game_kind == 4'b1110) ) 
+                   // ??port_4803 = { 5'b11110 ,  coin_counter };
+                    port_4803 = { 4'b1111 ,  coin_counter[3:0] };
 
 
-	if (port_4805[3] & ~reg48xx[9])
+        if (port_4805[2] & ~reg48xx[9])
 		begin
             coin_counter = (coin_counter==0) ? 0 : coin_counter - 1 ;
         end

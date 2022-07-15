@@ -253,9 +253,9 @@ begin
            ptrap <= ptrap + 32'h1;
 
            
-    if (ptrap == 32'h123c_c000)
+    if (ptrap == 32'h00ea_6000)
         pt<=1;
-    if (ptrap == 32'h1245_6000)
+    if (ptrap == 32'h00ef_1000)
         pt<=0;
         
 end
