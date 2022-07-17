@@ -266,8 +266,9 @@ Dig Dug II              58XX  56XX  ----  ---- 3 4      1 4  UDLR:4805 T:4807[0]
     //xxxx + 56xx / 9
     if ( (game_kind[0] == 1'b1)  && ( reg48xx[24] == 9) )
     begin
-            reg48xx[22] <= port_4816[3:0];
-            reg48xx[23] <= port_4817[3:0];
+            reg48xx[22] <= {svsw,port_4816[2:0]};
+            reg48xx[23] <= {svsw,port_4817[2:0]};
+            
             reg48xx[18] <= dipsw[3:0];
             reg48xx[19] <= dipsw[3:0];
             reg48xx[20] <= dipsw[7:4];
@@ -281,9 +282,11 @@ Dig Dug II              58XX  56XX  ----  ---- 3 4      1 4  UDLR:4805 T:4807[0]
     
     if ( (game_kind == 4'b1110) && ( reg48xx[24] == 3) )
     begin
-            reg48xx[23] <= dipsw[3:0];
+            reg48xx[22] <= dipsw[3:0];
             reg48xx[21] <= dipsw[7:4];
             reg48xx[20] <= dipsw[11:8];
+            reg48xx[23] <= { svsw , 3'b0};
+                
     
     end
     
