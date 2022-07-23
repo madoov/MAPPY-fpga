@@ -109,9 +109,25 @@ begin
 	begin
 	reg48xx[ab_5b] <= inport[3:0];
 	end
-    //function 8,16 write -> next frame
-    if ((hcnt==399) && (vcnt==9'h013))
+    
+    //hit 4800
+    if (io_en & ZRW && (ab_5b == 5'b0) )
+    begin
+        if ( (game_kind[1] == 1'b0)  && reg48xx[8]==3 )
+                    reg48xx[3]  <= port_4803[3:0];
+    end
 
+      
+    //function 8,16 write -> next frame
+
+//    if ((hcnt==399) && (vcnt==9'h013))
+
+   
+
+//    if ((hcnt==399) && (vcnt==9'h020))
+    if ((hcnt==399) && (vcnt==9'h011))
+
+    //    if ((hcnt==399) && ( vcnt[0] == 1'b1 ) )
 	begin
 
 
@@ -191,10 +207,11 @@ begin
 // 56xx + 56xx 2bitsp  spacman  == 1011
 /*                                         4808 4818  sv
 Super Pac Man           56XX  56XX  ----  ---- 4 9      1 9  UDLR:4801 T:4803[0] S1:4803[2] C:4800[0]
+
 Pac & Pal               56XX  59XX  ----  ---- 1 3      1 3  (same)
 Motos                   56XX  56XX  ----  ---- 1 9      1 9  (same)
 
-Mappy                   58XX  58XX  ----  ---- 3 4      1 4  UDLR:4805 T:4807[0] S1:4807[2] C:4804[0]
+Mappy                   58XX  58XX  ----  ---- 3 4      1 4  UDLR:4805 T:4807[0] S1:4807[2] C:4800[0]
 The Tower of Druaga     58XX  56XX  ----  ---- 3 4      1 4  (same)
 Grobda                  58XX  56XX  ----  ---- 3 9      1 9  (same)
 Dig Dug II              58XX  56XX  ----  ---- 3 4      1 4  UDLR:4805 T:4807[0] T2:4815(tglsub) S1:4807[2]
@@ -211,7 +228,7 @@ Dig Dug II              58XX  56XX  ----  ---- 3 4      1 4  UDLR:4805 T:4807[0]
         begin
             reg48xx[0] <= port_4800[3:0];
             reg48xx[1] <= port_4801[3:0];
-            reg48xx[3] <= port_4803[3:0];
+//          reg48xx[3] <= port_4803[3:0];
             reg48xx[4] <= port_4804[3:0];
             reg48xx[5] <= port_4805[3:0];
             reg48xx[7] <= port_4807[3:0];
@@ -328,6 +345,10 @@ Phozon                  58XX  56XX  ----  ----
 always @(posedge pxclk)
 	
 	if ((hcnt==399) && (vcnt==9'h010)) //240))
+//  if ( io_en )
+
+//    if ((hcnt==399) && ( vcnt[0] == 1'b0))
+  
 	begin
     
 	//service mode  motos,pp,sp(56XX)
@@ -413,6 +434,7 @@ end
     if ( game_kind == 4'b1001 ) port_4803 = { 5'b11110, coin_counter };
 		
 	end
+
 
 assign outport = (io_en) ? { 4'b1111, reg48xx[ab_5b] } : 8'h00 ;
 
