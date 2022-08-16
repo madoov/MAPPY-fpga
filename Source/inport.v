@@ -88,6 +88,8 @@ reg [7:0]port_mem;
 reg [7:0]coin_counter;
 reg [1:0]coin_toggle;
 
+reg deduction;
+
 
 reg [3:0] reg48xx [31:0];
 
@@ -117,6 +119,12 @@ begin
                     reg48xx[3]  <= port_4803[3:0];
     end
 
+    if (deduction) begin
+        reg48xx[3] <= port_4803[3:0];
+       
+    end
+    
+    
       
     //function 8,16 write -> next frame
 
@@ -387,9 +395,22 @@ always @(posedge pxclk)
         end
     
         //mp,gr,td,d2
-        if (game_kind[1] == 0)
+        if (game_kind[1] == 1'b0)
         begin
-      	port_4801[0] =   ( coin_counter == 0 ) ? 0 :  (reg48xx[9] ? 0 : port_4805[2]);
+        //check 4801 and coin deduction
+
+        port_4801[0] = reg48xx[9];
+        deduction = 0;
+        
+        if ( port_4805[2] && ~reg48xx[9] ) begin
+            if ( coin_counter != 0) begin
+                deduction = 1;
+                coin_counter = coin_counter - 1;
+                port_4801[0] = 1;
+            end
+        end
+
+        // 	port_4801[0] =   ( coin_counter == 0 ) ? 0 :  (reg48xx[9] ? 0 : port_4805[2]);
         coin_toggle[0] = ( coin_toggle[1] ? 0 : COIN );
         coin_toggle[1] = COIN;
         port_4800[0] =  coin_toggle[0];
@@ -416,6 +437,13 @@ end
 	if (coin_toggle[0]) begin
             coin_counter = (coin_counter == 9) ? coin_counter : coin_counter + coin_toggle[0];
     end
+
+//  if (port_4805[2] & ~port_4801[0] )// ~reg48xx[9])
+//		begin
+//           coin_counter = (coin_counter==0) ? 0 : coin_counter - 1 ;
+//      end
+
+
     //spだけ別処理
         if ( game_kind==4'b1011 ) 
              port_4801 = { 5'b11110 ,  coin_counter };
@@ -425,11 +453,7 @@ end
                     port_4803 = { 4'b1111 ,  coin_counter[3:0] };
 
 
-        if (port_4805[2] & ~reg48xx[9])
-		begin
-            coin_counter = (coin_counter==0) ? 0 : coin_counter - 1 ;
-        end
-
+   
    // gr は特別処理
     if ( game_kind == 4'b1001 ) port_4803 = { 5'b11110, coin_counter };
 		

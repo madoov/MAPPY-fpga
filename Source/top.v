@@ -397,6 +397,10 @@ dru_irq dru_irqvector(
 	.IRQEN	(irqen)	,
 	.IRQEN2	(irqen2)	,
 	.IRQTRG	(vblank)	,
+    .pxclk  (pixel_clk),
+    .hc     (hcnt),
+    .vc     (vcnt),
+    .hb     (hblank),
 	.n_IRQ	(ZINT)	,
 	.n_IRQ2	(ZINT2)	
 		

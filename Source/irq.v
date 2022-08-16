@@ -34,31 +34,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 module dru_irq( 
-    input wire IRQEN, IRQEN2, IRQTRG, 
-    output wire n_IRQ, n_IRQ2
+    input wire IRQEN, IRQEN2, 
+    input wire IRQTRG, 
+    output wire n_IRQ, n_IRQ2,
+    
+    input wire pxclk,
+    input wire hb,
+    input wire [8:0]hc,
+    input wire [8:0]vc
    
    );
 
 	reg irq_latch,irq_latch2;
 
-	
-	always @(posedge IRQTRG or negedge IRQEN)
+    always @(posedge IRQTRG or negedge IRQEN)
+    //always @(posedge pxclk or negedge IRQEN)
+ 
 	begin
 		if(IRQEN==0)
 			irq_latch = 1'b1;
 		else
-			irq_latch = 1'b0;
-	end
+         //   if (hb && (hc[6:0]==7'h28) && (vc == 240) )
+                irq_latch = 1'b0;
+            
+        end
 	
 	
-	
-	always @(posedge IRQTRG or negedge IRQEN2)
+    always @(posedge IRQTRG or negedge IRQEN2)
+    //always @(posedge pxclk or negedge IRQEN2)
+       
 	begin
 		if (IRQEN2==0)
 			irq_latch2 = 1'b1;
 		else
-			irq_latch2 = 1'b0;
-	end
+      //      if (hb && (hc[6:0]==7'h28) && (vc == 240) )
+                irq_latch2 = 1'b0;
+	end  
 
 assign n_IRQ = irq_latch;
 assign n_IRQ2 = irq_latch2;
