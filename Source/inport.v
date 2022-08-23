@@ -324,7 +324,7 @@ end
     
     
 /*
-                                            4808 4818  sv
+                                               4808 4818  sv
 Super Pac Man           56XX  56XX  ----  ---- 4 9      1 9  UDLR:4801 T:4803[0] S1:4803[2] C:4800[0]
 Pac & Pal               56XX  59XX  ----  ---- 1 3      1 3  (same)
 Motos                   56XX  56XX  ----  ---- 1 9      1 9  (same)
@@ -387,20 +387,19 @@ always @(posedge pxclk)
     	port_4805[3] = START;
 
         //mp,td,d2,gr,sp
-        
         //58xx + xxxx
-        if (game_kind[1] == 1'b0) begin
-    	port_4815[0] = ( port_4815[1] ) ? 0 : TRIG2 ;
-    	port_4815[1] = TRIG2;
-        end
+            if (game_kind[1] == 1'b0) begin
+            port_4815[0] = ( port_4815[1] ) ? 0 : TRIG2 ;
+            port_4815[1] = TRIG2;
+            end
     
         //mp,gr,td,d2
-        if (game_kind[1] == 1'b0)
-        begin
+            if (game_kind[1] == 1'b0)
+            begin
         //check 4801 and coin deduction
 
-        port_4801[0] = reg48xx[9];
-        deduction = 0;
+            port_4801[0] = reg48xx[9];
+            deduction = 0;
         
         if ( port_4805[2] && ~reg48xx[9] ) begin
             if ( coin_counter != 0) begin
@@ -426,9 +425,9 @@ always @(posedge pxclk)
         if (reg48xx[8] == 4) begin
         //sp
         if (game_kind == 4'b1011) begin
-        coin_toggle[0] = ( coin_toggle[1] ? 0 : COIN );
-        coin_toggle[1] = COIN;
-        port_4802[0] =  coin_toggle[0];
+            coin_toggle[0] = ( coin_toggle[1] ? 0 : COIN );
+            coin_toggle[1] = COIN;
+            port_4802[0] =  coin_toggle[0];
         end
     end
 
@@ -447,7 +446,7 @@ end
     //spだけ別処理
         if ( game_kind==4'b1011 ) 
              port_4801 = { 5'b11110 ,  coin_counter };
-        else 
+            else 
              if ( ~ (game_kind == 4'b0011 || game_kind == 4'b1110) ) 
                    // ??port_4803 = { 5'b11110 ,  coin_counter };
                     port_4803 = { 4'b1111 ,  coin_counter[3:0] };
