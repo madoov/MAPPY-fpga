@@ -115,13 +115,21 @@ begin
     //hit 4800
     if (io_en & ZRW && (ab_5b == 5'b0) )
     begin
-        if ( (game_kind[1] == 1'b0)  && reg48xx[8]==3 )
-                    reg48xx[3]  <= port_4803[3:0];
+        if ( (game_kind[1] == 1'b0)  &&  reg48xx[8]==3 )
+                    begin
+                        reg48xx[3]  <= port_4803[3:0];
+                    end
+                    
     end
 
     if (deduction) begin
-        reg48xx[3] <= port_4803[3:0];
-       
+        if (game_kind == 4'b1011)
+            reg48xx[1] <= port_4801[3:0];
+        else
+            reg48xx[3] <= port_4803[3:0];
+        
+        
+        
     end
     
     
@@ -352,12 +360,8 @@ Phozon                  58XX  56XX  ----  ----
 
 always @(posedge pxclk)
 	
-	if ((hcnt==399) && (vcnt==9'h010)) //240))
-//  if ( io_en )
-
-//    if ((hcnt==399) && ( vcnt[0] == 1'b0))
-  
-	begin
+    if ((hcnt==399) && (vcnt==9'h010)) 	begin
+    
     
 	//service mode  motos,pp,sp(56XX)
     if (reg48xx[8] == 1)
@@ -378,8 +382,7 @@ always @(posedge pxclk)
         end
         
     //mp,td,d2,gr,sp
-    else 
-       begin
+    else begin
         port_4804 = {4'hf, LEFT,DOWN,RIGHT,UP} ;
     	port_4805[0] = ( port_4805[1] ) ? 0 : TRIG ;
     	port_4805[1] = TRIG;
@@ -388,56 +391,56 @@ always @(posedge pxclk)
 
         //mp,td,d2,gr,sp
         //58xx + xxxx
-            if (game_kind[1] == 1'b0) begin
-            port_4815[0] = ( port_4815[1] ) ? 0 : TRIG2 ;
-            port_4815[1] = TRIG2;
+            if (game_kind[3] == 1'b0) begin
+                port_4815[0] = ( port_4815[1] ) ? 0 : TRIG2 ;
+                port_4815[1] = TRIG2;
             end
-    
-        //mp,gr,td,d2
-            if (game_kind[1] == 1'b0)
-            begin
-        //check 4801 and coin deduction
+            else begin
+                port_4816[0] =  TRIG2;
+                port_4817[0] =  TRIG2;
+            end
 
-            port_4801[0] = reg48xx[9];
+            
+                
+            if (game_kind == 4'b1011 ) 
+                    port_4803[0] = reg48xx[9];
+                    else
+                    port_4801[0] = reg48xx[9];
+    
+                
+                
             deduction = 0;
         
-        if ( port_4805[2] && ~reg48xx[9] ) begin
-            if ( coin_counter != 0) begin
-                deduction = 1;
-                coin_counter = coin_counter - 1;
-                port_4801[0] = 1;
-            end
-        end
+                if ( port_4805[2] && ~reg48xx[9] && (coin_counter != 0) ) begin
+                        deduction = 1;
+                        coin_counter = coin_counter - 1;
+                        if (game_kind == 4'b1011) 
+                                port_4803[0] = 1;
+                                else
+                                port_4801[0] = 1;
+
+                end
 
         // 	port_4801[0] =   ( coin_counter == 0 ) ? 0 :  (reg48xx[9] ? 0 : port_4805[2]);
-        coin_toggle[0] = ( coin_toggle[1] ? 0 : COIN );
-        coin_toggle[1] = COIN;
-        port_4800[0] =  coin_toggle[0];
-        
-        port_4816[0] =  TRIG2;
-        port_4817[0] =  TRIG2;
-        
-   
-        
-        end
-    //end
-
-        if (reg48xx[8] == 4) begin
-        //sp
-        if (game_kind == 4'b1011) begin
             coin_toggle[0] = ( coin_toggle[1] ? 0 : COIN );
             coin_toggle[1] = COIN;
-            port_4802[0] =  coin_toggle[0];
+            if ( game_kind == 4'b1011)
+                port_4802[0] = coin_toggle[0];
+                else
+                port_4800[0] =  coin_toggle[0];
+        
+        
+   
         end
-    end
-
-end
+            
+//        end
+ //   end
 
 	if (coin_toggle[0]) begin
-            coin_counter = (coin_counter == 9) ? coin_counter : coin_counter + coin_toggle[0];
+           coin_counter = (coin_counter == 9) ? coin_counter : coin_counter + coin_toggle[0];
     end
 
-//  if (port_4805[2] & ~port_4801[0] )// ~reg48xx[9])
+ // if (port_4805[2] & ~port_4801[0] )// ~reg48xx[9])
 //		begin
 //           coin_counter = (coin_counter==0) ? 0 : coin_counter - 1 ;
 //      end
@@ -445,18 +448,15 @@ end
 
     //spだけ別処理
         if ( game_kind==4'b1011 ) 
-             port_4801 = { 5'b11110 ,  coin_counter };
-            else 
-             if ( ~ (game_kind == 4'b0011 || game_kind == 4'b1110) ) 
-                   // ??port_4803 = { 5'b11110 ,  coin_counter };
+                    port_4801 = { 4'b1111 ,  coin_counter[3:0] };
+        else if ( ~ (game_kind == 4'b0011 || game_kind == 4'b1110) ) 
                     port_4803 = { 4'b1111 ,  coin_counter[3:0] };
 
-
-   
    // gr は特別処理
     if ( game_kind == 4'b1001 ) port_4803 = { 5'b11110, coin_counter };
-		
-	end
+
+end
+
 
 
 assign outport = (io_en) ? { 4'b1111, reg48xx[ab_5b] } : 8'h00 ;

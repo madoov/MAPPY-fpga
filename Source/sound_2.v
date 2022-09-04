@@ -44,9 +44,12 @@ module WSG_c1599
 	input wire  pxclk,
     input wire  [15:0] SA,
     input wire  [7:0]  SD,
+    input wire cpu_wr,
 	output wire [7:0]c99raw_out,
 	output wire [7:0]waverom_addr,
-	input wire  [7:0]waverom_data
+	input wire  [7:0]waverom_data,
+    
+    input wire isGrobda
 );
 
 reg [19:0] F [0:7];
@@ -56,7 +59,7 @@ reg [3:0]  V [0:7];
 //for grobda voice
 reg [3:0]  Vo;
 
-wire wr = (SA[15:6] == 10'h000);
+wire wr = (SA[15:6] == 10'h000) & cpu_wr;
 
 //wave counter
 reg [20:0] c [0:7];
@@ -72,7 +75,7 @@ reg  [7:0]c99out_ch;
 reg  [6:0]phase_pxclk;
 
 //cus99 out 
-assign c99raw_out = voin ? {4'b1111, Vo } : c99out_ch; 
+assign c99raw_out = (voin & isGrobda)  ? {4'b1111, Vo } : c99out_ch; 
 
 //accurate data
 // pxclk 6.144MHz
@@ -82,6 +85,7 @@ assign c99raw_out = voin ? {4'b1111, Vo } : c99out_ch;
 reg voin;
 
 wire [2:0] channel = SA[5:3];
+wire [2:0] phase_channel = phase_pxclk[6:4];
 
 always @ ( posedge pxclk or posedge RESET ) begin
 
@@ -121,7 +125,6 @@ always @ ( posedge pxclk or posedge RESET ) begin
         endcase
     end
    end
-end
 
 
 //pxclk = 6.144MHz
@@ -133,12 +136,6 @@ end
 //phase 7bit
 //freq= 20bit
 //20bit+ 20bit => 21bit
-
-
-wire [2:0] phase_channel = phase_pxclk[6:4];
-
-always @(posedge pxclk or posedge RESET )
-begin
 
 
    if ( RESET ) begin

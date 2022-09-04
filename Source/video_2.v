@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `default_nettype none
 `endif
 
+
 module mappy_video(
 
     output wire [11:0]AB_tile,
@@ -43,7 +44,7 @@ module mappy_video(
 	
 // VIDEO input
 	input wire pclk,		// 6.144MHz video clock
-	input wire flip,		// screen flip register
+//	input wire flip,		// screen flip register
 
     // VIDEO output
 	output wire [8:0] vc,   // V-counter
@@ -81,7 +82,11 @@ module mappy_video(
 	input wire [7:0]gfx2aout,
 	input wire [7:0]gfx2bout,
     
-    input wire [3:0]game_kind
+    input wire [3:0]game_kind,
+
+    //global flip
+    input wire gflip
+    
 );
 
 wire pclk6x = clk_36864;
@@ -155,6 +160,8 @@ begin
     
 end
 
+reg [8:0]rev_delay_hcount;
+
 always @(posedge pclk)
 begin
 
@@ -169,12 +176,19 @@ begin
 //  ideal
 //      3...256,384,385,386, 387....402, 401...514
 //      3...256,384,385,386, 387...402,501...511,0,1,2
-      
+
 	delay_hcount = hcount + 4;
 	if (delay_hcount == 256) delay_hcount = 384;
 	if (delay_hcount == 257) delay_hcount = 385;
 	if (delay_hcount == 258) delay_hcount = 386;
 	if (delay_hcount == 259) delay_hcount = 387;
+
+    rev_delay_hcount = gflip ? 
+                 (  ( hcount[8] ?   { hcount[8:7],~hcount[6:4],~hcount[3:0]} : {0, ~hcount[7:0] } ) ) :
+                delay_hcount ;
+
+    
+    
 	
    //actual 252,253,254,255,256,257,258,387,388,389,390...
    //ideal  252,253,254,255,384,385,386,387......	
@@ -203,6 +217,8 @@ reg [8:0] delay_vcount ;
 reg vblank;
 wire vsync;
 
+reg [8:0] wk_vcount;
+
 initial delay_vcount = 9'h1f0;
 
 always @(posedge pclk)
@@ -210,31 +226,47 @@ begin
 
 if (hblank && hcount[6:0] == 7'h28) begin
 
-	if ( vcount == 240)
+    
+
+ //0---255,504--511
+ //
+	if ( wk_vcount == 240)
 		vblank <= 1;
-	if ( vcount[5:0] == 6'h10)
+	if ( wk_vcount[5:0] == 6'h10)
 		vblank <= 0;
 
-		vcount <= (vcount==247) ? 496 : vcount+1;
+		wk_vcount <= (wk_vcount==247) ? 496 : wk_vcount+1;
         
+        vcount = gflip ? 
+                ( ( wk_vcount[8] ?   { wk_vcount[8:4],~wk_vcount[3:0]} : {0, ~wk_vcount[7:0] } ) )
+                : wk_vcount;
 
 end
 
 	
 end
 
-assign vsync = ( vcount[8:3] == 6'b1_1111_0 );
-reg [8:0] scrl_vcount;
+assign vsync = ( wk_vcount[8:3] == 6'b1_1111_0 );
 
+reg [8:0] scrl_vcount;
+reg [8:0] lr_vcount;
 
 always @(posedge pclk)
 begin
 	// V blank
 	if (hblank && hcount[6:0] == 7'h28) begin
 
-	delay_vcount = vcount + 9'h1f0 ;
-	scrl_vcount = delay_vcount + tile_scroll+1;
-	delay_vcount <= (delay_vcount==255) ? 504 : delay_vcount+1;
+	delay_vcount = vcount + 9'h1f0;
+
+	scrl_vcount = gflip ? ( delay_vcount + tile_scroll -2 ) : ( delay_vcount + tile_scroll +2 );
+
+	lr_vcount = gflip ? ( delay_vcount -2 ) : ( delay_vcount +2 );
+   
+    
+    delay_vcount <= gflip ? ( (delay_vcount==504) ? 255 : delay_vcount-1 ) :
+                            ( (delay_vcount==255) ? 504 : delay_vcount+1 ) ;
+
+
 	end
 	
 	
@@ -247,8 +279,8 @@ assign hb = hblank;
 
 assign hs = hsync;
 assign vs = vsync;
-assign vc = vcount;
-
+assign vc = wk_vcount;
+//wire [3:0] vc;
 // address bus
 
 //
@@ -396,7 +428,8 @@ begin
             abobj3 <= 11'h780 + offset;
 
 
-			ypos = obj2in ; 
+			ypos = obj2in ;
+        
 			tileno =  obj1in[7:0];
             objflipx = obj3in[0];
 			objflipy = obj3in[1];
@@ -410,7 +443,8 @@ begin
 			palno = obj1in[5:0];
 			xpos = { obj3in[0], obj2in[7:0] };
 			//objdisable = obj3in[1];
-			y_v_add = ypos + delay_vcount[7:0] + ( xsize[1] ? 16 : 0) - 1; 
+			y_v_add = ypos + delay_vcount[8:0] + ( xsize[1] ? 16 : 0) - (gflip ? 2 : 0 );
+            
             s_match = (offset == 129 ) ? 0 :   (xsize[1]) ? ( y_v_add[8:5]==4'b0111 ) : (y_v_add[8:4]==5'b01110);
             offset = (offset == 129 ) ? offset  :  offset + ( n_spr_in_progress ) ;
 
@@ -529,12 +563,16 @@ spr_adder  sa0	(
       wire [9:0] ab_centr_gr = (scrl_vcount[8:3]  << 5 | hcount[7:3]) + 8'h40;
 
 //mappy type
-wire [11:0] ab_lr_centr_mp  = {5'b1111_1 , &hcount[6:4] , hcount[3] , 4'b0000, delay_vcount[3] } ;
-wire [11:0] ab_lr_norml_mp = {5'b1111_1 , &hcount[6:4] , hcount[3] , delay_vcount[7:3] } + 2 ;
-wire [11:0] ab_lr_mp = (delay_vcount[7:4]==4'b0111) ? ab_lr_centr_mp : ab_lr_norml_mp;
+//wire [11:0] ab_lr_centr_mp  = {5'b1111_1 , &hcount[6:4] , hcount[3] , 4'b0000, delay_vcount[3] } ;
+//wire [11:0] ab_lr_norml_mp = {5'b1111_1 , &hcount[6:4] , hcount[3] , delay_vcount[7:3] } + 2 ;
+//wire [11:0] ab_lr_mp = (delay_vcount[7:4]==4'b0111) ? ab_lr_centr_mp : ab_lr_norml_mp;
+wire [11:0] ab_lr_centr_mp  = {5'b1111_1 , &hcount[6:4] , hcount[3] , 4'b0000, lr_vcount[3] } ;
+wire [11:0] ab_lr_norml_mp = {5'b1111_1 , &hcount[6:4] , hcount[3] , lr_vcount[7:3] } + 2 ;
+wire [11:0] ab_lr_mp = (lr_vcount[7:4]==4'b0111) ? ab_lr_centr_mp : ab_lr_norml_mp;
 
 //grobda,pacnpal,spacman type
-wire [9:0] ab_lr_gr  = {{4{ &hcount[6:4]}} ,hcount[3],delay_vcount[7:3] } + 2;
+//wire [9:0] ab_lr_gr  = {{4{ &hcount[6:4]}} ,hcount[3],delay_vcount[7:3] } + 2;
+wire [9:0] ab_lr_gr  = {{4{ &hcount[6:4]}} ,hcount[3],lr_vcount[7:3] } + 2;
 
 // multiplex
 assign AB_tile  = (hcount[8]) ?  ( game_kind[3] ? ab_lr_gr : ab_lr_mp )    : (game_kind[3] ? ab_centr_gr : ab_centr_mp ) ; // L,R    / center
@@ -568,7 +606,7 @@ begin
 	default:	begin
 	
 		ref_addr = (hcount[8]) ?
-							{ tile_ram_out, ~hcount[2], vcount[2:0] } :
+							{ tile_ram_out, ~hcount[2], lr_vcount[2:0] } :
 							{ tile_ram_out, ~hcount[2], scrl_vcount[2:0] } ;
 		disp_count = disp_count +1;
         nlr_raddr = hcount_read[8:0];
@@ -621,13 +659,18 @@ begin
 end
 
 reg [7:0]color_latch;
-
 wire [8:0] tline0r;
+
+
+
+            
+
+
 simple_dual_port_ram #( .DATA_WIDTH(8), .ADDR_WIDTH(10) , .OUTPUT_REG ("FALSE") )
  tline_1 (
     .wdata  ({pal_latch[6],color_latch}),
-    .waddr  ({vcount[0],hcount}),
-    .raddr  ({~vcount[0],delay_hcount}),
+    .waddr  ({vcount[0], hcount}),
+    .raddr  ({~vcount[0],rev_delay_hcount}),
     .we (disp_count==3),
     .re (1),
     .wclk (~clk_18432),

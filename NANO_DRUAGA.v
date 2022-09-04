@@ -108,7 +108,7 @@ begin
 end
 
 assign debug1 = svsw;//dipsw_port[0];
-assign debug2 = 0;
+assign debug2 = gflip;//~c99_out[1];
 assign debug3 = 0;
 assign debug4 = 0;
  
@@ -222,7 +222,9 @@ wire[3:0]game_kind =  4'b0100;
 
 //service switch for mappy 
 reg [16:0] count6m;
+
 reg key_a,key_b;
+reg key_a2,key_b2;
 
 always @(posedge clk_6144)
 begin
@@ -230,14 +232,23 @@ begin
     if (count6m == 17'b0) begin
         if ( ( key_a != KEY[0] ) && ( KEY[0]==0) )begin
                             key_b = ~key_b ;
-                               end
-    end
+                            end
+        if ( ( key_a2 != KEY[1] ) && ( KEY[1]==0) )begin
+                            key_b2 = ~key_b2 ;
+                            end
+
+                        
+                  end
     if (count6m == 17'b1) begin
                 key_a = KEY[0];
+                key_a2 = KEY[1];
     end
 end
 wire svsw;
+wire gflip;
+
 assign svsw = key_b;
+assign gflip = key_b2;
 
 
 reg [31:0]ptrap;
@@ -308,7 +319,9 @@ mappy_top mappy (
     
     .game_kind ( game_kind ),
     .dipsw     (dipsw_port),
-    .svsw      ( svsw )
+    .svsw      ( svsw ),
+    
+    .gflip      ( gflip )
 
 	);
 `ifdef QUARTUS

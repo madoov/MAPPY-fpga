@@ -5,3 +5,5 @@ work_pnr/
 work_pt/
 .lock
 work_dbg/
+*.vcd
+*.log

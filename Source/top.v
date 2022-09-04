@@ -88,8 +88,11 @@ module mappy_top(
     input wire [3:0]game_kind,
     
     input wire [15:0]dipsw,
-    input wire svsw
+    input wire svsw,
+    
+    input wire gflip
 
+    
 	
 	
 );
@@ -331,7 +334,7 @@ mappy_video video_module(
 
 
 	.pclk(pixel_clk),
-	.flip(flip),
+	//.flip(flip),
 	.vb(vblank),
 	.hb(hblank),
 	.hc(hcnt),
@@ -380,7 +383,10 @@ mappy_video video_module(
 	.gfx2aout (gfx2aout),
 	.gfx2bout (gfx2bout),
     
-    .game_kind (game_kind)
+    .game_kind (game_kind),
+    
+    .gflip      (gflip)
+    
 
 	
 
@@ -411,11 +417,14 @@ dru_irq dru_irqvector(
 // sound
 /////////////////////////////////////////////////////////////////////////////
 WSG_c1599 sound (
-		.RESET	(),
+		//.RESET	(~nsubrst),
 		.pxclk	(pixel_clk),
 		.SA		(SA),
 		.SD 	(SDO),
 		.c99raw_out (c99out),
+        .cpu_wr (~SRnW),
+        .isGrobda ( game_kind == 4'b1001 ),
+        
 		
 		.waverom_addr  ( waverom_addr ),
 		.waverom_data  ( waverom_data )
