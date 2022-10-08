@@ -1,0 +1,250 @@
+{
+    "debug_cores": [
+        {
+            "name": "la0",
+            "type": "la",
+            "uuid": "78881b0e01c3482aaea020646825dd53",
+            "trigin_en": false,
+            "trigout_en": false,
+            "auto_inserted": true,
+            "capture_control": false,
+            "data_depth": 16384,
+            "input_pipeline": 1,
+            "probes": [
+                {
+                    "name": "mappy/sound/c99out",
+                    "width": 8,
+                    "probe_type": 1
+                }
+            ]
+        }
+    ],
+    "connections": [
+        {
+            "command": "add_ports",
+            "id": 1,
+            "args": {
+                "netlist": "NANO_DRUAGA",
+                "ports": [
+                    {
+                        "name": "jtag_inst1_CAPTURE",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_DRCK",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_RESET",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_RUNTEST",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_SEL",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_SHIFT",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_TCK",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_TDI",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_TMS",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_UPDATE",
+                        "dir": "in",
+                        "width": 1
+                    },
+                    {
+                        "name": "jtag_inst1_TDO",
+                        "dir": "out",
+                        "width": 1
+                    }
+                ]
+            }
+        },
+        {
+            "command": "instantiate",
+            "netlist": "edb_top",
+            "id": 2,
+            "instance": "edb_top_inst"
+        },
+        {
+            "command": "connect",
+            "id": 3,
+            "args": {
+                "instance": "edb_top_inst",
+                "ports": [
+                    {
+                        "name": "bscan_CAPTURE",
+                        "net": "jtag_inst1_CAPTURE"
+                    },
+                    {
+                        "name": "bscan_DRCK",
+                        "net": "jtag_inst1_DRCK"
+                    },
+                    {
+                        "name": "bscan_RESET",
+                        "net": "jtag_inst1_RESET"
+                    },
+                    {
+                        "name": "bscan_RUNTEST",
+                        "net": "jtag_inst1_RUNTEST"
+                    },
+                    {
+                        "name": "bscan_SEL",
+                        "net": "jtag_inst1_SEL"
+                    },
+                    {
+                        "name": "bscan_SHIFT",
+                        "net": "jtag_inst1_SHIFT"
+                    },
+                    {
+                        "name": "bscan_TCK",
+                        "net": "jtag_inst1_TCK"
+                    },
+                    {
+                        "name": "bscan_TDI",
+                        "net": "jtag_inst1_TDI"
+                    },
+                    {
+                        "name": "bscan_TMS",
+                        "net": "jtag_inst1_TMS"
+                    },
+                    {
+                        "name": "bscan_UPDATE",
+                        "net": "jtag_inst1_UPDATE"
+                    },
+                    {
+                        "name": "bscan_TDO",
+                        "net": "jtag_inst1_TDO"
+                    },
+                    {
+                        "name": "la0_clk",
+                        "net": "pixel_clk",
+                        "path": [
+                            "mappy"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[0]",
+                        "net": "c99out[0]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[1]",
+                        "net": "c99out[1]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[2]",
+                        "net": "c99out[2]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[3]",
+                        "net": "c99out[3]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[4]",
+                        "net": "c99out[4]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[5]",
+                        "net": "c99out[5]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[6]",
+                        "net": "c99out[6]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    },
+                    {
+                        "name": "la0_probe0[7]",
+                        "net": "c99out[7]",
+                        "path": [
+                            "mappy",
+                            "sound"
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "vdbs": [
+        {
+            "file": "debug_top.post.vdb",
+            "instance": "edb_top_inst"
+        }
+    ],
+    "session": {
+        "wizard": {
+            "data_depth": 16384,
+            "capture_control": false,
+            "selected_nets": [
+                {
+                    "name": "c99out",
+                    "width": 8,
+                    "clk_domain": "mappy/pixel_clk",
+                    "selected_probe_type": "DATA AND TRIGGER",
+                    "child": [],
+                    "path": [
+                        "mappy",
+                        "sound"
+                    ],
+                    "net_idx_left": 7,
+                    "net_idx_right": 0
+                }
+            ],
+            "top_module": "NANO_DRUAGA",
+            "db_checksum": "ba5fce12098a2c03e7bae2e9a172d1842464edfca8e284870b3519e987537970",
+            "src": "elaborate",
+            "jtag_user": "USER1",
+            "input_pipeline": 1
+        }
+    }
+}
