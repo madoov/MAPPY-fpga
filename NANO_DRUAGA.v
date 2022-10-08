@@ -222,28 +222,63 @@ wire[3:0]game_kind =  4'b0100;
 
 //service switch for mappy 
 reg [16:0] count6m;
-
+reg [31:0] fliptrap;
 reg key_a,key_b;
 reg key_a2,key_b2;
+reg [1:0] keyab;
 
+
+`define one_switch
 always @(posedge clk_6144)
+`ifdef two_switch
 begin
+    
     count6m <= count6m + 1;
     if (count6m == 17'b0) begin
         if ( ( key_a != KEY[0] ) && ( KEY[0]==0) )begin
                             key_b = ~key_b ;
                             end
+
         if ( ( key_a2 != KEY[1] ) && ( KEY[1]==0) )begin
                             key_b2 = ~key_b2 ;
                             end
 
-                        
                   end
     if (count6m == 17'b1) begin
                 key_a = KEY[0];
                 key_a2 = KEY[1];
     end
+
+    
+    
+ 
+    
+`endif
+`ifdef one_switch
+begin
+    
+    count6m <= count6m + 1;
+    if (count6m == 17'b0) begin
+        if ( ( key_a != KEY[0] ) && ( KEY[0]==0) )begin
+                            keyab = keyab + 1;
+                            key_b =  keyab[0];
+                            key_b2 = keyab[1];
+                            end
+                  end
+    if (count6m == 17'b1) begin
+                        key_a = KEY[0];
+                            end
+
+    
+    
+ 
+    
+`endif
+//ifdef でコンパイル時に抜けないようわざとendは外にだしておく
+//抜けたらここでエラー
 end
+
+
 wire svsw;
 wire gflip;
 

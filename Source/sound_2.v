@@ -105,13 +105,15 @@ always @ ( posedge pxclk or posedge RESET ) begin
      case (SA[2:0])
     //channel = SA[5:3];
         3'b011: V[channel] <= SD[3:0];
-        3'b100: F[channel][7:0] <= SD; 
-        3'b101: F[channel][15:8] <= SD;
+        3'b100: F[channel][7:0] <= SD;  
+        3'b101: F[channel][15:8] <= SD; 
         3'b110:
             begin
                 voin <= 1'b0;
                 W[channel]        <= SD[6:4];
                 F[channel][19:16] <= SD[3:0];
+            
+                
             end
         //grobda
         3'b010:
